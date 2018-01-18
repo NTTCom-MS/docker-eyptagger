@@ -6,6 +6,10 @@ GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 
 REPOLIST=$(curl https://api.github.com/users/${GITHUB_USERNAME}/repos 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
 
+git config --global user.email "${BOT_EMAIL}"
+git config --global user.name "${BOT_NAME}"
+
+
 for REPO_URL in ${REPOLIST};
 do
   REPO_NAME=${REPO_URL##*/}
@@ -54,6 +58,8 @@ do
        git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
      fi
    fi
+
+  git push --follow-tags
   fi
 done
 
