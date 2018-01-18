@@ -4,7 +4,7 @@ mkdir -p /var/eyprepos
 
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 
-REPOLIST=$(curl https://api.github.com/users/${GITHUB_USERNAME}/repos 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
+REPOLIST=$(curl https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=1000 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
 
 git config --global user.email "${BOT_EMAIL}"
 git config --global user.name "${BOT_NAME}"
