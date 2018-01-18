@@ -3,6 +3,7 @@ MAINTAINER Jordi Prats
 
 ENV HOME /root
 ENV GITHUB_USERNAME NTTCom-MS
+ENV REPO_PATTERN eyp-
 
 RUN yum install epel-release -y
 RUN yum install git -y
@@ -12,6 +13,7 @@ RUN mkdir -p /var/eyprepos /usr/bin
 
 COPY updatetags.sh /usr/bin/updatetags.sh
 
-VOLUME ["/etc/puppetlabs"]
+VOLUME ["/var/eyprepos"]
+VOLUME ["/root/.ssh"]
 
 CMD /bin/bash /usr/bin/updatetags.sh
