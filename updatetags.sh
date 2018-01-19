@@ -4,10 +4,33 @@ mkdir -p /var/eyprepos
 
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 
-REPOLIST=$(curl https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=250 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
+API_URL="https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100"
 
-git config --global user.email "${BOT_EMAIL}"
-git config --global user.name "${BOT_NAME}"
+function paginar()
+{
+  REPO_LIST_HEADERS=$(curl -I "${API_URL}&page=${PAGENUM}" 2>/dev/null)
+
+  echo "${REPO_LIST_HEADERS}" | grep "HTTP/1.1 403 Forbidden"
+  if [ $? -eq 0 ];
+  then
+    RESET_RATE_LIMIT=$(echo "${REPO_LIST_HEADERS}" | grep "^X-RateLimit-Reset" | awk '{ print $NF }' | grep -Eo "[0-9]*")
+    CURRENT_TS=$(date +%s)
+
+    if [ "${RESET_RATE_LIMIT}" -ge "${CURRENT_TS}" ];
+    then
+      let SLEEP_RATE_LIMIT=RESET_RATE_LIMIT-CURRENT_TS
+    else
+      SLEEP_RATE_LIMIT=10
+    fi
+
+    echo "rate limited, sleep: ${SLEEP_RATE_LIMIT}"
+    sleep "${SLEEP_RATE_LIMIT}"
+  fi
+
+  REPOLIST_LINKS=$(echo "${REPO_LIST_HEADERS}" | grep "^Link" | head -n1)
+  REPOLIST_NEXT=$(echo "${REPOLIST_LINKS}" | awk '{ print $2 }')
+  REPOLIST_LAST=$(echo "${REPOLIST_LINKS}" | awk '{ print $4 }')
+}
 
 function tagrepo()
 {
@@ -63,6 +86,29 @@ function tagrepo()
   git push --follow-tags
   fi
 }
+
+# curl -I https://api.github.com/users/NTTCom-MS/repos?per_page=100 2>/dev/null| grep ^Link:
+
+PAGENUM=1
+
+REPOLIST=$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
+
+paginar()
+
+while [ "${REPOLIST_NEXT}"!="${REPOLIST_LAST}" ];
+do
+  let PAGENUM=PAGENUM+1
+
+  REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
+
+  paginar()
+done
+
+echo "${REPOLIST}"
+exit 0
+
+git config --global user.email "${BOT_EMAIL}"
+git config --global user.name "${BOT_NAME}"
 
 echo "start: $(date)"
 for REPO_URL in ${REPOLIST};
