@@ -75,9 +75,9 @@ function tagrepo()
        else
          TAG_LATEST_COMMIT=$(git tag --points-at "${LATEST_COMMIT}")
 
-         if [ "${TAG_LATEST_COMMIT}" != "${LATEST_COMMIT}"];
+         if [ -z "${TAG_LATEST_COMMIT}" ];
          then
-           # tag no apunta al ultim commit, eliminar tag i tornat a apuntar
+           # no hi ha tag a lultim commit, reapuntem
            git tag -d "${MODULE_VERSION}"
            git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
          fi
