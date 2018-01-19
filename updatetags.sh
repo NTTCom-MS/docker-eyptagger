@@ -1,8 +1,7 @@
 #!/bin/bash
 
-mkdir -p /var/eyprepos
-
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
+REPOBASEDIR=${REPOBASEDIR:-/var/eyprepos}
 
 API_URL="https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100"
 
@@ -39,11 +38,11 @@ function tagrepo()
   REPO_NAME=${REPO_URL##*/}
   REPO_NAME=${REPO_NAME%.*}
 
-  echo $REPO_NAME
-  cd /var/eyprepos
-  git clone $REPO_URL
+  echo ${REPO_NAME}
+  cd ${REPOBASEDIR}
+  git clone ${REPO_URL}
 
-  cd $REPO_NAME
+  cd ${REPO_NAME}
 
   LATEST_COMMIT=$(git log -1 --pretty=format:%H)
 
@@ -86,6 +85,8 @@ function tagrepo()
   git push --follow-tags
   fi
 }
+
+mkdir -p ${REPOBASEDIR}
 
 # curl -I https://api.github.com/users/NTTCom-MS/repos?per_page=100 2>/dev/null| grep ^Link:
 
