@@ -57,7 +57,7 @@ function tagrepo()
 
      if [ ! -z "${LATEST_TAG}" ];
      then
-       if [ "${LATEST_TAG}"!="${MODULE_VERSION}" ];
+       if [ "${LATEST_TAG}" != "${MODULE_VERSION}" ];
        then
         # el tag no correspon a la versio actual
         # TODO: verifico que no existeixi el tag
@@ -69,7 +69,7 @@ function tagrepo()
        else
          TAG_LATEST_COMMIT=$(git tag --points-at "${LATEST_COMMIT}")
 
-         if [ "${TAG_LATEST_COMMIT}"!="${LATEST_COMMIT}"];
+         if [ "${TAG_LATEST_COMMIT}" != "${LATEST_COMMIT}"];
          then
            # tag no apunta al ultim commit, eliminar tag i tornat a apuntar
            git tag -d "${MODULE_VERSION}"
@@ -96,7 +96,7 @@ REPOLIST=$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut 
 
 paginar
 
-while [ "${REPOLIST_NEXT}"!="${REPOLIST_LAST}" ];
+while [ "${REPOLIST_NEXT}" != "${REPOLIST_LAST}" ];
 do
   let PAGENUM=PAGENUM+1
 
