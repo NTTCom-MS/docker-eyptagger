@@ -41,7 +41,7 @@ function tagrepo()
 
   echo ${REPO_NAME}
   cd ${REPOBASEDIR}
-  
+
   if [ -d "${REPO_NAME}" ];
   then
     rm -fr "${REPOBASEDIR}/${REPO_NAME}"
@@ -59,7 +59,7 @@ function tagrepo()
 
    if [ ! -z "${MODULE_VERSION}" ];
    then
-     LATEST_TAG=$(git tag -l -n 1)
+     LATEST_TAG=$(git tag -l | tail -n 1)
 
      if [ ! -z "${LATEST_TAG}" ];
      then
