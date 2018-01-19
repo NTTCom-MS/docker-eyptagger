@@ -99,11 +99,13 @@ paginar
 while [ "${REPOLIST_NEXT}" != "${REPOLIST_LAST}" ];
 do
   let PAGENUM=PAGENUM+1
-
   REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
 
   paginar
 done
+
+let PAGENUM=PAGENUM+1
+REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
 
 echo "${REPOLIST}"
 exit 0
