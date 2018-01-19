@@ -23,6 +23,9 @@ function paginar()
       SLEEP_RATE_LIMIT=10
     fi
 
+    RANDOM_EXTRA_SLEEP=$(echo $RANDOM | grep -Eo "^[0-9]{2}")
+    let SLEEP_RATE_LIMIT=SLEEP_RATE_LIMIT+RANDOM_EXTRA_SLEEP
+
     echo "rate limited, sleep: ${SLEEP_RATE_LIMIT}"
     sleep "${SLEEP_RATE_LIMIT}"
   fi
@@ -152,6 +155,9 @@ else
       else
         SLEEP_RATE_LIMIT=10
       fi
+
+      RANDOM_EXTRA_SLEEP=$(echo $RANDOM | grep -Eo "^[0-9]{2}")
+      let SLEEP_RATE_LIMIT=SLEEP_RATE_LIMIT+RANDOM_EXTRA_SLEEP
 
       echo "rate limited, sleep: ${SLEEP_RATE_LIMIT}"
       sleep "${SLEEP_RATE_LIMIT}"
