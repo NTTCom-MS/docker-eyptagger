@@ -3,11 +3,12 @@
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 REPOBASEDIR=${REPOBASEDIR:-/var/eyprepos}
 
-API_URL="https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100"
+API_URL_REPOLIST="https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100"
+API_URL_REPOINFO_BASE="https://api.github.com/repos/${GITHUB_USERNAME}"
 
 function paginar()
 {
-  REPO_LIST_HEADERS=$(curl -I "${API_URL}&page=${PAGENUM}" 2>/dev/null)
+  REPO_LIST_HEADERS=$(curl -I "${API_URL_REPOLIST}&page=${PAGENUM}" 2>/dev/null)
 
   echo "${REPO_LIST_HEADERS}" | grep "HTTP/1.1 403 Forbidden"
   if [ $? -eq 0 ];
@@ -86,38 +87,51 @@ function tagrepo()
   fi
 }
 
-mkdir -p ${REPOBASEDIR}
+function getrepolist()
+{
+  # curl -I https://api.github.com/users/NTTCom-MS/repos?per_page=100 2>/dev/null| grep ^Link:
 
-# curl -I https://api.github.com/users/NTTCom-MS/repos?per_page=100 2>/dev/null| grep ^Link:
+  PAGENUM=1
 
-PAGENUM=1
-
-REPOLIST=$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
-
-paginar
-
-while [ "${REPOLIST_NEXT}" != "${REPOLIST_LAST}" ];
-do
-  let PAGENUM=PAGENUM+1
-  REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
+  REPOLIST=$(curl "${API_URL_REPOLIST}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
 
   paginar
-done
 
-let PAGENUM=PAGENUM+1
-REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
+  while [ "${REPOLIST_NEXT}" != "${REPOLIST_LAST}" ];
+  do
+    let PAGENUM=PAGENUM+1
+    REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL_REPOLIST}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
 
-echo "${REPOLIST}"
-exit 0
+    paginar
+  done
+
+  let PAGENUM=PAGENUM+1
+  REPOLIST=$(echo -e "${REPOLIST}\n$(curl "${API_URL_REPOLIST}&page=${PAGENUM}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")")
+}
+
+mkdir -p ${REPOBASEDIR}
 
 git config --global user.email "${BOT_EMAIL}"
 git config --global user.name "${BOT_NAME}"
 
-echo "start: $(date)"
-for REPO_URL in ${REPOLIST};
-do
+if [ -z "$1" ];
+then
+  getrepolist
+
+  echo "start: $(date)"
+  for REPO_URL in ${REPOLIST};
+  do
+    tagrepo "${REPO_URL}"
+  done
+  echo "end: $(date)"
+else
+  # un sol repo
+
+  #GET /repos/:owner/:repo
+  #API_URL_REPOINFO_BASE="https://api.github.com/repos/${GITHUB_USERNAME}"
+  REPO_URL=$(curl "${API_URL_REPOINFO_BASE}/${1}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\")
+
   tagrepo "${REPO_URL}"
-done
-echo "end: $(date)"
+fi
 
 exit 0
