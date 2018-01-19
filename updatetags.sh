@@ -41,8 +41,13 @@ function tagrepo()
 
   echo ${REPO_NAME}
   cd ${REPOBASEDIR}
-  git clone ${REPO_URL}
+  
+  if [ -d "${REPO_NAME}" ];
+  then
+    rm -fr "${REPOBASEDIR}/${REPO_NAME}"
+  fi
 
+  git clone ${REPO_URL}
   cd ${REPO_NAME}
 
   LATEST_COMMIT=$(git log -1 --pretty=format:%H)
