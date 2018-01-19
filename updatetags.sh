@@ -23,6 +23,9 @@ function paginar()
       SLEEP_RATE_LIMIT=10
     fi
 
+    RANDOM_EXTRA_SLEEP=$(echo $RANDOM | grep -Eo "^[0-9]{2}")
+    let SLEEP_RATE_LIMIT=SLEEP_RATE_LIMIT+RANDOM_EXTRA_SLEEP
+
     echo "rate limited, sleep: ${SLEEP_RATE_LIMIT}"
     sleep "${SLEEP_RATE_LIMIT}"
   fi
@@ -135,6 +138,31 @@ else
   #GET /repos/:owner/:repo
   #API_URL_REPOINFO_BASE="https://api.github.com/repos/${GITHUB_USERNAME}"
   REPO_URL=$(curl "${API_URL_REPOINFO_BASE}/${1}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\")
+
+  if [ -z "${REPO_URL}" ];
+  then
+    REPO_INFO_HEADERS=$(curl -I "${API_URL_REPOINFO_BASE}/${1}" 2>/dev/null)
+
+    echo "${REPO_INFO_HEADERS}" | grep "HTTP/1.1 403 Forbidden"
+    if [ $? -eq 0 ];
+    then
+      RESET_RATE_LIMIT=$(echo "${REPO_INFO_HEADERS}" | grep "^X-RateLimit-Reset" | awk '{ print $NF }' | grep -Eo "[0-9]*")
+      CURRENT_TS=$(date +%s)
+
+      if [ "${RESET_RATE_LIMIT}" -ge "${CURRENT_TS}" ];
+      then
+        let SLEEP_RATE_LIMIT=RESET_RATE_LIMIT-CURRENT_TS
+      else
+        SLEEP_RATE_LIMIT=10
+      fi
+
+      RANDOM_EXTRA_SLEEP=$(echo $RANDOM | grep -Eo "^[0-9]{2}")
+      let SLEEP_RATE_LIMIT=SLEEP_RATE_LIMIT+RANDOM_EXTRA_SLEEP
+
+      echo "rate limited, sleep: ${SLEEP_RATE_LIMIT}"
+      sleep "${SLEEP_RATE_LIMIT}"
+    fi
+  fi
 
   tagrepo "${REPO_URL}"
 fi
