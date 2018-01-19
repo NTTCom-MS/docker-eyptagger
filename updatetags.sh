@@ -4,14 +4,15 @@ mkdir -p /var/eyprepos
 
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 
-REPOLIST=$(curl https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=1000 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
+REPOLIST=$(curl https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=250 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | grep -E "/${REPO_PATTERN}")
 
 git config --global user.email "${BOT_EMAIL}"
 git config --global user.name "${BOT_NAME}"
 
+function tagrepo()
+{
+  REPO_URL=$1
 
-for REPO_URL in ${REPOLIST};
-do
   REPO_NAME=${REPO_URL##*/}
   REPO_NAME=${REPO_NAME%.*}
 
@@ -61,6 +62,13 @@ do
 
   git push --follow-tags
   fi
+}
+
+echo "start: $(date)"
+for REPO_URL in ${REPOLIST};
+do
+  tagrepo "${REPO_URL}"
 done
+echo "end: $(date)"
 
 exit 0
