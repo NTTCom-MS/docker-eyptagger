@@ -130,6 +130,7 @@ then
   for REPO_URL in ${REPOLIST};
   do
     tagrepo "${REPO_URL}"
+    sleep $(echo $RANDOM | grep -Eo "^[0-9]{2}")
   done
   echo "end: $(date)"
 else
