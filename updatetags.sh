@@ -6,6 +6,18 @@ REPOBASEDIR=${REPOBASEDIR:-/var/eyprepos}
 API_URL_REPOLIST="https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100"
 API_URL_REPOINFO_BASE="https://api.github.com/repos/${GITHUB_USERNAME}"
 
+function botsays()
+{
+  if [ ! -z "${TELEGRAMTOKEN}" ] && [ ! -z "${TELEGRAMCHATID}" ];
+  then
+    curl -s \
+    -X POST \
+    https://api.telegram.org/bot${TELEGRAMTOKEN}/sendMessage \
+    -d text="${1}" \
+    -d chat_id=$TELEGRAMCHATID
+  fi
+}
+
 function paginar()
 {
   REPO_LIST_HEADERS=$(curl -I "${API_URL_REPOLIST}&page=${PAGENUM}" 2>/dev/null)
@@ -75,6 +87,7 @@ function tagrepo()
         #  then
         #  fi
         git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
+        botsays "new tag for ${REPO_NAME}: ${MODULE_VERSION}"
        else
          TAG_LATEST_COMMIT=$(git tag --points-at "${LATEST_COMMIT}")
 
@@ -83,10 +96,12 @@ function tagrepo()
            # no hi ha tag a lultim commit, reapuntem
            git tag -d "${MODULE_VERSION}"
            git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
+           botsays "updated tag to latest commit for ${REPO_NAME}/${MODULE_VERSION}"
          fi
        fi
      else
        # no existeixen tags
+       botsays "first tag for ${REPO_NAME}: ${MODULE_VERSION}"
        git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
      fi
    fi
