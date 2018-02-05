@@ -74,11 +74,12 @@ function tagrepo()
 
    if [ ! -z "${MODULE_VERSION}" ];
    then
-     LATEST_TAG=$(git tag -l | tail -n 1)
+     LIST_TAGS=$(git tag -l)
 
-     if [ ! -z "${LATEST_TAG}" ];
+     if [ ! -z "${LIST_TAGS}" ];
      then
-       if [ "${LATEST_TAG}" != "${MODULE_VERSION}" ];
+       echo "${LIST_TAGS}" | grep "${MODULE_VERSION}" >/dev/null 2>&1
+       if [ "$?" -ne "0" ];
        then
         # el tag no correspon a la versio actual
         # TODO: verifico que no existeixi el tag
