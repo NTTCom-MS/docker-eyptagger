@@ -78,7 +78,7 @@ function tagrepo()
 
      if [ ! -z "${LIST_TAGS}" ];
      then
-       echo "${LIST_TAGS}" | grep "${MODULE_VERSION}" >/dev/null 2>&1
+       echo "${LIST_TAGS}" | grep "^${MODULE_VERSION}\$" >/dev/null 2>&1
        if [ "$?" -ne "0" ];
        then
         # el tag no correspon a la versio actual
@@ -90,12 +90,13 @@ function tagrepo()
         git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
         botsays "new tag for ${REPO_NAME}: ${MODULE_VERSION}"
        else
-         TAG_LATEST_COMMIT=$(git tag --points-at "${LATEST_COMMIT}")
+         TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}")"
 
          if [ -z "${TAG_LATEST_COMMIT}" ];
          then
            # no hi ha tag a lultim commit, reapuntem
            git tag -d "${MODULE_VERSION}"
+           git push --delete origin "${MODULE_VERSION}"
            git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
            botsays "updated tag to latest commit for ${REPO_NAME}/${MODULE_VERSION}"
          fi
