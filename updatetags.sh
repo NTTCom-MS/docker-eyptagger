@@ -65,6 +65,15 @@ function tagrepo()
   git clone ${REPO_URL}
   cd ${REPO_NAME}
 
+  OWNER=$(git remote show origin | grep Fetch | awk '{ print $NF }' | rev | cut -f 2 -d/ | cut -f 1 -d: | rev)
+
+  if [ -z "${OWNER}" ];
+  then
+    REPO_DISPLAY_NAME="${REPO_NAME}"
+  else
+    REPO_DISPLAY_NAME="${OWNER}/${REPO_NAME}"
+  fi
+
   LATEST_COMMIT=$(git log -1 --pretty=format:%H)
 
   if [ ! -z "${LATEST_COMMIT}" ];
@@ -88,7 +97,7 @@ function tagrepo()
         #  then
         #  fi
         git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
-        botsays "new tag for ${REPO_NAME}: ${MODULE_VERSION}"
+        botsays "new tag for ${REPO_DISPLAY_NAME}: ${MODULE_VERSION}"
        else
          TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}")"
 
@@ -98,12 +107,12 @@ function tagrepo()
            git tag -d "${MODULE_VERSION}"
            git push --delete origin "${MODULE_VERSION}"
            git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
-           botsays "updated tag to latest commit for ${REPO_NAME}/${MODULE_VERSION}"
+           botsays "updated tag to latest commit for ${REPO_DISPLAY_NAME}:${MODULE_VERSION}"
          fi
        fi
      else
        # no existeixen tags
-       botsays "first tag for ${REPO_NAME}: ${MODULE_VERSION}"
+       botsays "first tag for ${REPO_DISPLAY_NAME}:${MODULE_VERSION}"
        git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
      fi
    fi
