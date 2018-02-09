@@ -107,7 +107,7 @@ function tagrepo()
            git tag -d "${MODULE_VERSION}"
            git push --delete origin "${MODULE_VERSION}"
            git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
-           botsays "updated tag to latest commit for ${REPO_DISPLAY_NAME}:${MODULE_VERSION}"
+           botsays "updated tag to latest commit for ${REPO_DISPLAY_NAME}:${MODULE_VERSION} -> ${LATEST_COMMIT}"
          fi
        fi
      else
