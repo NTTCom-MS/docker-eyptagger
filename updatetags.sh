@@ -121,9 +121,6 @@ function tagrepo()
          TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}" | grep latest)"
          if [ -z "${TAG_LATEST_COMMIT}" ];
          then
-           git tag latest -m "$(date +%Y%m%d%H%M)"
-           botsays "new latest tag for ${REPO_DISPLAY_NAME}:${MODULE_VERSION} -> ${LATEST_COMMIT}"
-         else
            git tag -d latest
            git push --delete origin latest
            git tag latest -m "$(date +%Y%m%d%H%M)"
