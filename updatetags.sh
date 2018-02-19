@@ -99,7 +99,7 @@ function tagrepo()
         git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
         botsays "new tag for ${REPO_DISPLAY_NAME}: ${MODULE_VERSION}"
        else
-         TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}")"
+         TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}" | grep "^${MODULE_VERSION}\$")"
 
          if [ -z "${TAG_LATEST_COMMIT}" ];
          then
@@ -108,6 +108,26 @@ function tagrepo()
            git push --delete origin "${MODULE_VERSION}"
            git tag "${MODULE_VERSION}" -m "$(date +%Y%m%d%H%M)"
            botsays "updated tag to latest commit for ${REPO_DISPLAY_NAME}:${MODULE_VERSION} -> ${LATEST_COMMIT}"
+         fi
+       fi
+
+       # update latest tag
+       echo "${LIST_TAGS}" | grep "^latest\$" >/dev/null 2>&1
+       if [ "$?" -ne 0 ];
+       then
+         git tag latest -m "$(date +%Y%m%d%H%M)"
+         botsays "new latest tag for ${REPO_DISPLAY_NAME} pointing to release ${MODULE_VERSION}"
+       else
+         TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}" | grep latest)"
+         if [ -z "${TAG_LATEST_COMMIT}" ];
+         then
+           git tag latest -m "$(date +%Y%m%d%H%M)"
+           botsays "new latest tag for ${REPO_DISPLAY_NAME}:${MODULE_VERSION} -> ${LATEST_COMMIT}"
+         else
+           git tag -d latest
+           git push --delete origin latest
+           git tag latest -m "$(date +%Y%m%d%H%M)"
+           botsays "updated latest tag to latest commit for ${REPO_DISPLAY_NAME}:${MODULE_VERSION} -> ${LATEST_COMMIT}"
          fi
        fi
      else
