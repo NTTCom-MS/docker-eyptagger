@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -z "${ENABLE_DEBUG}" ] && [ "${ENABLE_DEBUG}" -eq 1 ];
+then
+  set -x
+fi
+
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 REPOBASEDIR=${REPOBASEDIR:-/var/eyprepos}
 
