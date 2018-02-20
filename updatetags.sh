@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -z "${ENABLE_DEBUG}" ] && [ "${ENABLE_DEBUG}" -eq 1 ];
+then
+  set -x
+fi
+
 GITHUB_USERNAME=${GITHUB_USERNAME:-NTTCom-MS}
 REPOBASEDIR=${REPOBASEDIR:-/var/eyprepos}
 
@@ -181,7 +186,7 @@ else
 
   #GET /repos/:owner/:repo
   #API_URL_REPOINFO_BASE="https://api.github.com/repos/${GITHUB_USERNAME}"
-  REPO_URL=$(curl "${API_URL_REPOINFO_BASE}/${1}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\")
+  REPO_URL=$(curl "${API_URL_REPOINFO_BASE}/${1}" 2>/dev/null | grep "ssh_url" | cut -f4 -d\" | head -n1)
 
   if [ -z "${REPO_URL}" ];
   then
