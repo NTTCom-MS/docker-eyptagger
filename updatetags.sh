@@ -67,7 +67,7 @@ function tagrepo()
     rm -fr "${REPOBASEDIR}/${REPO_NAME}"
   fi
 
-  if [ ! -z "${DISABLE_RANDOM_SLEEP}" ] && [ "${DISABLE_RANDOM_SLEEP}" -eq 1 ];
+  if [ -z "${DISABLE_RANDOM_SLEEP}" ] || [ "${DISABLE_RANDOM_SLEEP}" -eq 0 ];
   then
     sleep $(echo $RANDOM | grep -Eo "^[0-9]{2}")
   fi
