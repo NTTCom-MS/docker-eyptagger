@@ -67,6 +67,11 @@ function tagrepo()
     rm -fr "${REPOBASEDIR}/${REPO_NAME}"
   fi
 
+  if [ -z "${DISABLE_RANDOM_SLEEP}" ] || [ "${DISABLE_RANDOM_SLEEP}" -eq 0 ];
+  then
+    sleep $(echo $RANDOM | grep -Eo "^[0-9]{2}")
+  fi
+
   git clone ${REPO_URL}
   cd ${REPO_NAME}
 
@@ -178,7 +183,6 @@ then
   for REPO_URL in ${REPOLIST};
   do
     tagrepo "${REPO_URL}"
-    sleep $(echo $RANDOM | grep -Eo "^[0-9]{2}")
   done
   echo "end: $(date)"
 else
