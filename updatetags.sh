@@ -121,21 +121,12 @@ function tagrepo()
          fi
        fi
 
-       # update latest tag
+       # delete useless latest tag
        echo "${LIST_TAGS}" | grep "^latest\$" >/dev/null 2>&1
-       if [ "$?" -ne 0 ];
+       if [ "$?" -eq 0 ];
        then
-         git tag latest -m "$(date +%Y%m%d%H%M)"
-         botsays "new latest tag for ${REPO_DISPLAY_NAME} pointing to release ${MODULE_VERSION}"
-       else
-         TAG_LATEST_COMMIT="$(git tag --points-at "${LATEST_COMMIT}" | grep latest)"
-         if [ -z "${TAG_LATEST_COMMIT}" ];
-         then
-           git tag -d latest
-           git push --delete origin latest
-           git tag latest -m "$(date +%Y%m%d%H%M)"
-           botsays "updated latest tag to release ${REPO_DISPLAY_NAME}:${MODULE_VERSION}"
-         fi
+         git tag -d latest
+         git push --delete origin latest
        fi
      else
        # no existeixen tags
